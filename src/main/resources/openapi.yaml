@@ -1,0 +1,134 @@
+openapi: 3.0.0
+info:
+  title: Mini-lånesøknad
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/v1
+paths:
+  /loanApplications:
+    get:
+      operationId: listLoanApplications
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanApplications'
+          description: An array of loan applications
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List all loan applications
+      tags:
+        - applications
+    post:
+      operationId: createLoanApplication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanApplication'
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanApplication'
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create a new loan application
+      tags:
+        - applications
+
+  /loanApplications/{loanApplicationId}:
+    get:
+      operationId: showLoanApplicationById
+      parameters:
+        - description: The id of the loan application to retrieve
+          explode: false
+          in: path
+          name: loanApplicationId
+          required: true
+          schema:
+            type: integer
+            format: int64
+          style: simple
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanApplication'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Info for a specific loan application
+      tags:
+        - applications
+
+components:
+  schemas:
+    LoanApplication:
+      example: {
+        "lanetakere": [{ "fnr": "01056000069", "navn": "Kari Nordmann" } , { "fnr": "01056000301", "navn": "Ola Nordmann" }],
+        "lanebelop": 2450000,
+        "behov": "Vi skal låne penger til........"
+      }
+      properties:
+        id:
+          format: int64
+          type: integer
+        lanetakere:
+          type: array
+          items:
+            $ref: '#/components/schemas/Lanetaker'
+        lanebelop:
+          type: integer
+          format: int64
+        behov:
+          type: string
+      required:
+        - lanetakere
+        - lanebelop
+        - behov
+      type: object
+
+    LoanApplications:
+      items:
+        $ref: '#/components/schemas/LoanApplication'
+      type: array
+
+    Lanetaker:
+      type: object
+      properties:
+        fnr:
+          type: string
+        navn:
+          type: string
+      required:
+        - fnr
+        - navn
+
+    Error:
+      properties:
+        code:
+          format: int32
+          type: integer
+        message:
+          type: string
+      required:
+        - code
+        - message
+      type: object
